@@ -6,37 +6,45 @@ export default function App() {
   const [id, setId] = useState(null);
   const [detail, setDetail] = useState(false);
   const [status, setStatus] = useState([]);
+  let list = [];
   useEffect(() => {
     async function getData() {
       try {
         const response = await fetch('http://192.168.0.201:3000/products');
-        const data = await response.json();
-        setData(data);
+        const dataJson = await response.json();
+        setData(dataJson);
       } catch (error) {
         alert(error);
       }
     }
     getData();
   }, []);
-
   function handleDetail(pId) {
-    const item = status.filter(item => item.id === pId);
-    if (item.length === 0) {
-      console.log(status);
-    } else {
-      const {id, detail} = item[0];
-      const removedItem = status.filter(item => item.id !== id);
-      removedItem.push({id, detail: !detail});
-      setStatus(removedItem);
+    if (list.length !== data.length) {
+      list = [];
+      data.map(item => {
+        list.push({id: item.id, detail: false});
+      });
     }
 
-    const teste = status.filter(item => item.id === pId);
+    const oldItem = list.filter(item => item.id === pId);
 
-    teste.map(item => {
-      setId(item.id);
-      setDetail(item.detail);
-    });
+    const newItem = {id: oldItem[0].id, detail: !oldItem[0].detail};
 
+    list = list.filter(item => item.id !== pId);
+
+    list.push(newItem);
+
+    console.log(list);
+
+    const item = list.filter(item => item.id === pId);
+    const {id, detail} = item[0];
+
+    setStatus(list);
+
+    setId(id);
+    setDetail(detail);
+    console.log(status);
     /* setId(pId);
     if (detail && pId === id) {
       setDetail(false);
@@ -46,8 +54,18 @@ export default function App() {
   }
   return (
     <View style={{backgroundColor: 'blue', padding: 10, flex: 1}}>
+      <FlatList
+        data={status}
+        renderItem={({item}) => (
+          <View style={{flexDirection: 'row'}}>
+            <Text style={{color: 'white'}}>{item.id}</Text>
+            <Text style={{color: 'white'}}>{String(item.detail)}</Text>
+          </View>
+        )}
+        keyExtractor={item => String(item.id)}
+      />
       <Text>App</Text>
-      <Text style={{color: '#FFF'}}>{id + String(detail)}</Text>
+
       <FlatList
         showsVerticalScrollIndicator={false}
         data={data}
