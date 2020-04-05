@@ -3,70 +3,46 @@ import {View, Text, FlatList, TouchableOpacity, Image} from 'react-native';
 
 export default function App() {
   const [data, setData] = useState([]);
-  const [id, setId] = useState(null);
-  const [detail, setDetail] = useState(false);
   const [status, setStatus] = useState([]);
+  const [refresh, setRefresh] = useState(false);
   let list = [];
   useEffect(() => {
-    async function getData() {
-      try {
-        const response = await fetch('http://192.168.0.201:3000/products');
-        const dataJson = await response.json();
-        setData(dataJson);
-      } catch (error) {
-        alert(error);
-      }
-    }
     getData();
   }, []);
-  function handleDetail(pId) {
-    if (list.length !== data.length) {
-      list = [];
-      data.map(item => {
+  async function getData() {
+    try {
+      setRefresh(true);
+      const response = await fetch('http://192.168.0.23:3000/products');
+      const dataJson = await response.json();
+      setData(dataJson);
+
+      dataJson.map((item) => {
         list.push({id: item.id, detail: false});
       });
+      setStatus(list);
+      setRefresh(false);
+    } catch (error) {
+      alert(error);
     }
-
-    const oldItem = list.filter(item => item.id === pId);
+  }
+  function handleDetail(pId) {
+    const oldItem = status.filter((item) => item.id === pId);
 
     const newItem = {id: oldItem[0].id, detail: !oldItem[0].detail};
 
-    list = list.filter(item => item.id !== pId);
+    const temp = status.filter((item) => item.id !== pId);
 
-    list.push(newItem);
+    temp.push(newItem);
 
-    console.log(list);
-
-    const item = list.filter(item => item.id === pId);
-    const {id, detail} = item[0];
-
-    setStatus(list);
-
-    setId(id);
-    setDetail(detail);
-    console.log(status);
-    /* setId(pId);
-    if (detail && pId === id) {
-      setDetail(false);
-    } else {
-      setDetail(true);
-    } */
+    setStatus(temp);
   }
   return (
     <View style={{backgroundColor: 'blue', padding: 10, flex: 1}}>
-      <FlatList
-        data={status}
-        renderItem={({item}) => (
-          <View style={{flexDirection: 'row'}}>
-            <Text style={{color: 'white'}}>{item.id}</Text>
-            <Text style={{color: 'white'}}>{String(item.detail)}</Text>
-          </View>
-        )}
-        keyExtractor={item => String(item.id)}
-      />
       <Text>App</Text>
 
       <FlatList
+        onRefresh={getData}
+        refreshing={refresh}
         showsVerticalScrollIndicator={false}
         data={data}
         renderItem={({item}) => {
@@ -79,7 +55,8 @@ export default function App() {
                 borderRadius: 5,
               }}>
               <Text>{item.title}</Text>
-              {id === item.id && detail ? (
+              {status.length !== 0 &&
+              status.filter((it) => it.id === item.id)[0].detail ? (
                 <View>
                   <Text>{item.price}</Text>
                   <Image
@@ -103,13 +80,16 @@ export default function App() {
                   style={{
                     fontSize: 24,
                   }}>
-                  {id === item.id && detail ? '-' : '+'}
+                  {status.length !== 0 &&
+                  status.filter((it) => it.id === item.id)[0].detail
+                    ? '-'
+                    : '+'}
                 </Text>
               </TouchableOpacity>
             </View>
           );
         }}
-        keyExtractor={item => String(item.id)}
+        keyExtractor={(item) => String(item.id)}
       />
     </View>
   );
