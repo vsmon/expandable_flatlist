@@ -1,5 +1,12 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, FlatList, TouchableOpacity, Image} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+} from 'react-native';
 
 export default function App() {
   const [data, setData] = useState([]);
@@ -37,7 +44,7 @@ export default function App() {
     setStatus(temp);
   }
   return (
-    <View style={{backgroundColor: 'blue', padding: 10, flex: 1}}>
+    <View style={styles.container}>
       <Text>App</Text>
 
       <FlatList
@@ -47,13 +54,7 @@ export default function App() {
         data={data}
         renderItem={({item}) => {
           return (
-            <View
-              style={{
-                padding: 5,
-                marginBottom: 5,
-                backgroundColor: '#FFF',
-                borderRadius: 5,
-              }}>
+            <View style={styles.item}>
               <Text>{item.title}</Text>
               {status.length !== 0 &&
               status.filter((it) => it.id === item.id)[0].detail ? (
@@ -66,15 +67,7 @@ export default function App() {
                 </View>
               ) : null}
               <TouchableOpacity
-                style={{
-                  height: 20,
-                  width: 20,
-                  backgroundColor: '#CCC',
-                  alignSelf: 'flex-end',
-                  borderRadius: 5,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+                style={styles.buttonDetail}
                 onPress={() => handleDetail(item.id)}>
                 <Text
                   style={{
@@ -94,3 +87,26 @@ export default function App() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'blue',
+    padding: 10,
+    flex: 1,
+  },
+  item: {
+    padding: 5,
+    marginBottom: 5,
+    backgroundColor: '#FFF',
+    borderRadius: 5,
+  },
+  buttonDetail: {
+    height: 20,
+    width: 20,
+    backgroundColor: '#CCC',
+    alignSelf: 'flex-end',
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
